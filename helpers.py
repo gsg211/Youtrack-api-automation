@@ -112,4 +112,4 @@ def get_all_project_ids(youtrack_url, youtrack_token):
         "fields" : "id,name,shortName"
     }
     response= requests.get(endpoint,headers=headers, params=params)
-    print(response.json())
+    return response.json()

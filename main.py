@@ -26,15 +26,21 @@ def create_new_issue(ack, respond, command):
     print(issue)
     respond("created new issue")
 
+@app.command("/projects")
+def create_new_issue(ack, respond, command):
+    ack()
+    response=get_all_project_ids(YOUTRACK_URL, YOUTRACK_TOKEN)
+    respond(response.__repr__())
+
 if __name__ == "__main__":
-    # watcher_thread = threading.Thread(
-    #     target=watch_youtrack,
-    #     args=(YOUTRACK_URL, YOUTRACK_TOKEN, SLACK_BOT_TOKEN, SLACK_USER_ID),
-    #     daemon=True
-    # )
-    #
-    # watcher_thread.start()
-    # handler = SocketModeHandler(app, SLACK_APP_TOKEN)
-    # handler.start()
+    watcher_thread = threading.Thread(
+        target=watch_youtrack,
+        args=(YOUTRACK_URL, YOUTRACK_TOKEN, SLACK_BOT_TOKEN, SLACK_USER_ID),
+        daemon=True
+    )
+
+    watcher_thread.start()
+    handler = SocketModeHandler(app, SLACK_APP_TOKEN)
+    handler.start()
     print("temp")
     post_issue(YOUTRACK_URL,YOUTRACK_TOKEN,"Hello world 4 ", "custom description")
