@@ -1,4 +1,5 @@
 import gzip
+import threading
 import time
 
 import requests
@@ -8,6 +9,8 @@ import os
 from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+from slack_bolt import App
+from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 class Notification:
     def __init__(self, id, content):
@@ -74,19 +77,44 @@ def handle_response(response,notifications_list, slack_bot_token, slack_user_id)
     else:
         print(f"Error: {response.status_code} - {response.text}")
 
+def watch_youtrack(youtrack_url, youtrack_token, slack_bot_token, slack_user_id):
+    while True:
+        try:
+            notifications_list = load_sent_notifications()
+            response = get_notifications(youtrack_url, youtrack_token)
+            handle_response(response, notifications_list, slack_bot_token, slack_user_id)
+            time.sleep(10)
+        except Exception as e:
+            print(e)
+
+
+
+load_dotenv()
+
+
+YOUTRACK_URL = os.getenv("YOUTRACK_URL")
+YOUTRACK_TOKEN = os.getenv("YOUTRACK_TOKEN")
+SLACK_BOT_TOKEN=os.getenv("SLACK_BOT_TOKEN")
+SLACK_APP_TOKEN= os.getenv("SLACK_APP_TOKEN")
+SLACK_USER_ID = os.getenv("SLACK_USER_ID")
+
+
+app = App(token=SLACK_BOT_TOKEN)
+
+@app.command("/issue")
+def create_new_issue(ack, respond, command):
+    ack()
+    issue = command.get("text", "")
+    print(issue)
+    respond("created new issue")
 
 if __name__ == "__main__":
+    watcher_thread = threading.Thread(
+        target=watch_youtrack,
+        args=(YOUTRACK_URL, YOUTRACK_TOKEN, SLACK_BOT_TOKEN, SLACK_USER_ID),
+        daemon=True
+    )
 
-    load_dotenv()
-
-
-    YOUTRACK_URL = os.getenv("YOUTRACK_URL")
-    YOUTRACK_TOKEN = os.getenv("YOUTRACK_TOKEN")
-    SLACK_BOT_TOKEN=os.getenv("SLACK_BOT_TOKEN")
-    SLACK_USER_ID = os.getenv("SLACK_USER_ID")
-
-    while True:
-        notifications_list = load_sent_notifications()
-        response = get_notifications(YOUTRACK_URL, YOUTRACK_TOKEN)
-        handle_response(response,notifications_list,SLACK_BOT_TOKEN,SLACK_USER_ID)
-        time.sleep(1)
+    watcher_thread.start()
+    handler = SocketModeHandler(app, SLACK_APP_TOKEN)
+    handler.start()
