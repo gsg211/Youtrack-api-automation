@@ -87,6 +87,13 @@ def watch_youtrack(youtrack_url, youtrack_token, slack_bot_token, slack_user_id)
 def post_issue(youtrack_url, youtrack_token, issue_summary,issue_description="automated issue created by slack", project_id="0-0"):
     endpoint=f"{youtrack_url}/api/issues"
 
+    if issue_description is None or "":
+        print(issue_description)
+        issue_description = "automated issue created by slack"
+
+    if project_id is None:
+        project_id="0-0"
+
     headers={
         "Authorization" : f"Bearer {youtrack_token}",
         "Accept" : "application/json",

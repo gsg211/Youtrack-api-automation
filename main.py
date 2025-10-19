@@ -22,8 +22,16 @@ app = App(token=SLACK_BOT_TOKEN)
 @app.command("/issue")
 def create_new_issue(ack, respond, command):
     ack()
-    issue = command.get("text", "")
-    print(issue)
+    command_text= command.get("text", "").split(' ; ')
+    print(command_text)
+    issue_summary=command_text[0].strip()
+    if not issue_summary:
+        respond("New Issue must have a summary")
+
+    issue_description = command_text[1].strip() if len(command_text) > 1 else None
+    project_id = command_text[2].strip() if len(command_text) > 2 else None
+
+    post_issue(YOUTRACK_URL,YOUTRACK_TOKEN,issue_summary,issue_description,project_id)
     respond("created new issue")
 
 @app.command("/projects")
@@ -42,5 +50,3 @@ if __name__ == "__main__":
     watcher_thread.start()
     handler = SocketModeHandler(app, SLACK_APP_TOKEN)
     handler.start()
-    print("temp")
-    post_issue(YOUTRACK_URL,YOUTRACK_TOKEN,"Hello world 4 ", "custom description")
