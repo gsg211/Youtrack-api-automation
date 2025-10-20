@@ -14,8 +14,8 @@ from slack_sdk.errors import SlackApiError
 # ----------------------------------------------------
 
 class Notification:
-    def __init__(self, id, content):
-        self.id = id
+    def __init__(self, notification_id, content):
+        self.id = notification_id
         self.content = content
 
 # used to send the notification to the user
@@ -49,9 +49,9 @@ def load_sent_notifications():
     return id_list
 
 # appends a new id if a new notifications is sent
-def write_sent_notification(notificationID):
+def write_sent_notification(notification_id):
     with open('SentNotifications.text', 'a') as file:
-        file.writelines(notificationID + '\n')
+        file.writelines(notification_id + '\n')
 
 # get request to the youtrack rest api
 def get_notifications(url, token):
@@ -74,7 +74,10 @@ def handle_response(response,notifications_list, slack_bot_token, slack_user_id)
         # the response contains all notifications
         for notificationItem in response_content:
 
-            notification = Notification(notificationItem.get("id"), "/*******\\\n" + decode_notification(notificationItem.get("content")) + "\\*******/")
+            notification = Notification(
+                notificationItem.get("id"),
+                "/*******\\\n" + decode_notification(notificationItem.get("content")) + "\\*******/"
+            )
 
             if notification.id not in notifications_list:
                 notifications_list.append(notification.id)
@@ -100,11 +103,11 @@ def watch_youtrack(youtrack_url, youtrack_token, slack_bot_token, slack_user_id)
 def post_issue(youtrack_url, youtrack_token, issue_summary,issue_description="automated issue created by slack", project_id="0-0"):
     endpoint=f"{youtrack_url}/api/issues"
 
-    if issue_description is None or "":
+    if not issue_description :
         print(issue_description)
         issue_description = "automated issue created by slack"
 
-    if project_id is None:
+    if not project_id:
         project_id="0-0"
 
     headers={

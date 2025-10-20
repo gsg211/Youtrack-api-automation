@@ -1,5 +1,3 @@
-import requests
-
 from helpers import *
 import os
 from dotenv import load_dotenv
@@ -35,7 +33,7 @@ def create_new_issue(ack, respond, command):
 
 
 @app.command("/projects")
-def create_new_issue(ack, respond, command):
+def list_all_projects(ack, respond):
     ack()
     response=get_all_project_ids(YOUTRACK_URL, YOUTRACK_TOKEN)
     respond(response.__repr__())
