@@ -58,10 +58,11 @@ def get_notifications(url, token):
     endpoint = f"{url}/api/users/me/notifications"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/json"
+        "Accept": "application/json",
     }
     params = {
         "fields": "content,id",
+        "$top": "200"
     }
 
     return requests.get(endpoint, headers=headers, params=params)
@@ -78,7 +79,6 @@ def handle_response(response,notifications_list, slack_bot_token, slack_user_id)
                 notificationItem.get("id"),
                 "/*******\\\n" + decode_notification(notificationItem.get("content")) + "\\*******/"
             )
-
             if notification.id not in notifications_list:
                 notifications_list.append(notification.id)
                 write_sent_notification(notification.id)
@@ -148,6 +148,7 @@ def set_delay():
         try:
             delay = int(delay)
             print(f"delay value => {delay}")
+            return delay
         except ValueError:
             print("Delay must be a number, using default value => 500")
             return 500
