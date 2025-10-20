@@ -1,3 +1,5 @@
+from csv import excel
+
 from helpers import *
 import os
 from dotenv import load_dotenv
@@ -39,11 +41,13 @@ def list_all_projects(ack, respond):
     respond(response.__repr__())
 
 if __name__ == "__main__":
+    delay=set_delay()
+
     # The app runs 2 threads
     #watcher_thread checks the notifications and sends them to the Slack user
     watcher_thread = threading.Thread(
-        target=watch_youtrack,
-        args=(YOUTRACK_URL, YOUTRACK_TOKEN, SLACK_BOT_TOKEN, SLACK_USER_ID),
+        target=check_notifications,
+        args=(YOUTRACK_URL, YOUTRACK_TOKEN, SLACK_BOT_TOKEN, SLACK_USER_ID, delay),
         daemon=True
     )
     watcher_thread.start()

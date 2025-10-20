@@ -88,13 +88,14 @@ def handle_response(response,notifications_list, slack_bot_token, slack_user_id)
         print(f"Error: {response.status_code} - {response.text}")
 
 # the loop
-def watch_youtrack(youtrack_url, youtrack_token, slack_bot_token, slack_user_id):
+def check_notifications(youtrack_url, youtrack_token, slack_bot_token, slack_user_id, delay):
+    print(f"\nStarted checking notifications with delay of {delay}\n")
     while True:
         try:
             notifications_list = load_sent_notifications()
             response = get_notifications(youtrack_url, youtrack_token)
             handle_response(response, notifications_list, slack_bot_token, slack_user_id)
-            time.sleep(10)
+            time.sleep(delay)
         except Exception as e:
             print(e)
 
@@ -137,3 +138,17 @@ def get_all_project_ids(youtrack_url, youtrack_token):
     }
     response= requests.get(endpoint,headers=headers, params=params)
     return response.json()
+
+def set_delay():
+    delay = input("\nInput the time delay between requests\n{press ENTER for the default value 500}\nDelay : ")
+    if not delay:
+        print("default value selected => 500")
+        return 500
+    else:
+        try:
+            delay = int(delay)
+            print(f"delay value => {delay}")
+        except ValueError:
+            print("Delay must be a number, using default value => 500")
+            return 500
+    return 500
